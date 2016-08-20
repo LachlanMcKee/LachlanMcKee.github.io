@@ -217,27 +217,20 @@
     margin-bottom: $spacing-unit;
 	
     h1 {
-        font-size: 26px;
-
-        @include media-query($on-laptop) {
-            font-size: 22px;
-        }
+        font-size: 30px;
+		line-height: 50px;
+		border-bottom: 2px solid #c03;
+		text-transform: uppercase;
     }
 
     h2 {
-        font-size: 20px;
-		text-decoration: underline;
-
-        @include media-query($on-laptop) {
-            font-size: 18px;
-        }
+        font-size: 22px;
+		border-top: 1px solid #aaa;
+		border-bottom: 1px solid #aaa;
     }
 
     h3 {
-        font-size: 14px;
-
-        @include media-query($on-laptop) {
-            font-size: 10px;
-        }
+        font-size: 18px;
+		font-style: italic;
     }
 }

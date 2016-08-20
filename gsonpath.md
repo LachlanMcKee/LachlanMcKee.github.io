@@ -4,6 +4,8 @@ title: Gson Path
 permalink: /gsonpath/
 ---
 
+Last updated: August 21st 2016
+
 # Introduction
 Dealing with JSON is a common occurance these days when dealing with REST APIs. One of the most popular libraries for reading and writing JSON is [Gson](https://github.com/google/gson), a library written and maintained by Google.
 
@@ -14,6 +16,12 @@ Gson Path at its core is an annotation processor which generates Gson Type Adapt
 Aside from generating typical Gson Type Adapters at compile time, there are many other features available within the library which create extremely powerful Type Adapters which allow you to further reduce boilerplate code.
 
 ## Basic Json Path support
+
+Gson supports marshalling and unmarshalling JSON content into Java POJOs. Unfortunately the library requires a one-to-one relationship between a POJO and a JSON object. This means that the more complex a JSON document is, the more POJOs a developer must create.
+
+Gson Path adds basic [Json Path](http://goessner.net/articles/JsonPath/) support to solve this problem. Json Path is a query language similar to [XPath](https://en.wikipedia.org/wiki/XPath), which allows you to reference elements within a document through shorthand notation (e.g. `parent.child`).
+
+This shorthand notation is extremely useful to avoid creating numerous Java POJOs to access a particular subsection of a JSON document. Gson Path takes advantage of this Json Path 'dot notation' concept to give developers the ability to reference specific fields within a JSON tree from the standard Gson `SerializedName` annotation (this works for Type Adapter reading and writing).
 
 For example, given the following JSON:
 
@@ -28,7 +36,24 @@ For example, given the following JSON:
 }
 ```
 
-We can deserialize the content with a single class by using Gson Path. The following class demonstrates the annotations required to create a type adapter which can correctly read the content.
+We can deserialize the JSON with a single Java class multiple ways. The following classes demonstrate the annotations required to create a type adapter which can correctly read the nested content.
+
+### POJO Example 1
+
+The Json Path dot notation is added to Gson `@SerializedName` annotation value.
+
+```java
+public class PersonModel {
+    @SerializedName("person.names.first")
+    String firstName;
+
+    @SerializedName("person.names.last")
+    String lastName;
+}
+```
+
+### POJO Example 2
+The `rootField` property of the `@AutoGsonAdapter` annotation is useful to avoid repetition.
 
 ```java
 @AutoGsonAdapter(rootField = "person.names")
@@ -41,7 +66,8 @@ public class PersonModel {
 }
 ```
 
-We could also write it as follows (to reduce the number of annotations required):
+### POJO Example 3
+If the name of the field matches the name of the JSON key, the `@SerializedName` annotation can be omitted.
 
 ```java
 @AutoGsonAdapter(rootField = "person.names")
@@ -51,7 +77,8 @@ public class PersonModel {
 }
 ```
 
-Both POJOs will generate the following Gson TypeAdapter:
+### Generated Type Adapter
+All of the previous examples will generate the following Gson TypeAdapter:
 
 ```java
 public final class PersonModel_GsonTypeAdapter extends TypeAdapter<PersonModel> {
@@ -78,7 +105,7 @@ public final class PersonModel_GsonTypeAdapter extends TypeAdapter<PersonModel> 
                 continue;
             }
             
-            switch(in.nextName()) {
+            switch (in.nextName()) {
                 case "person":
                     jsonFieldCounter0++;
                     
@@ -96,7 +123,7 @@ public final class PersonModel_GsonTypeAdapter extends TypeAdapter<PersonModel> 
                             continue;
                         }
                         
-                        switch(in.nextName()) {
+                        switch (in.nextName()) {
                             case "names":
                                 jsonFieldCounter1++;
                                 
@@ -114,7 +141,7 @@ public final class PersonModel_GsonTypeAdapter extends TypeAdapter<PersonModel> 
                                         continue;
                                     }
                                     
-                                    switch(in.nextName()) {
+                                    switch (in.nextName()) {
                                         case "first":
                                             jsonFieldCounter2++;
                                             
