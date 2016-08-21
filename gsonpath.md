@@ -10,9 +10,25 @@ Last updated: August 21st 2016
 * [License](#license)
 
 # Introduction
-Dealing with JSON is a common occurrence these days when dealing with REST APIs. One of the most popular libraries for reading and writing JSON is [Gson](https://github.com/google/gson), a library written and maintained by Google.
+Reading and writing JSON is a common practice when working with REST APIs. One of the most popular Java libraries for reading and writing JSON is [Gson](https://github.com/google/gson), a library written and maintained by Google.
 
-Gson Path at its core is an annotation processor which generates Gson Type Adapters at compile time to avoid costly reflection at runtime. It also hosts a multitude of other features which will be described within this document.
+Gson Path at its core is a Java annotation processor which generates Gson Type Adapters at compile time to avoid costly reflection at runtime. It also hosts a multitude of other features which will be described within this document.
+
+# Usage
+
+Getting started using Gson Path is extremely simple. If you have not already done so, go to the [download](#download) section and add the dependency to your build.
+
+Since Gson Path is an annotation processor, the majority of the work is done for you during compilation. Every class annotated with the `@AutoGsonAdapter` annotation will prompt the library to generate a Type Adapter. There are many examples of the annotation usage described in the [features](#features) section.
+
+To make use of these generated classes, you must add the Gson Path Type Adapter Factory:
+
+```java
+GsonBuilder gsonBuilder = new GsonBuilder();
+gsonBuilder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory());
+Gson gson = gsonBuilder.create();
+```
+
+This Type Adapter factory adds all of the generated Type Adapters into Gson without a developer needing to reference the classes directly.
 
 # Features
 
