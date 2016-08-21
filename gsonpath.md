@@ -6,14 +6,22 @@ permalink: /gsonpath/
 
 Last updated: August 21st 2016
 
-# Introduction
-Dealing with JSON is a common occurance these days when dealing with REST APIs. One of the most popular libraries for reading and writing JSON is [Gson](https://github.com/google/gson), a library written and maintained by Google.
+* [Download](#download)
+* [License](#license)
 
-Gson Path at its core is an annotation processor which generates Gson Type Adapters at compile time to avoid costly reflection at runtime.
+# Introduction
+Dealing with JSON is a common occurrence these days when dealing with REST APIs. One of the most popular libraries for reading and writing JSON is [Gson](https://github.com/google/gson), a library written and maintained by Google.
+
+Gson Path at its core is an annotation processor which generates Gson Type Adapters at compile time to avoid costly reflection at runtime. It also hosts a multitude of other features which will be described within this document.
 
 # Features
 
 Aside from generating typical Gson Type Adapters at compile time, there are many other features available within the library which create extremely powerful Type Adapters which allow you to further reduce boilerplate code.
+
+1. [Basic Json Path support](#basic-json-path-support)
+2. [Client side validation](#client-side-validation)
+3. [Generate POJOs using interfaces](#generate-pojos-using-interfaces)
+4. [Json Path Substitutions](#json-path-substitutions)
 
 ## Basic Json Path support
 
@@ -227,7 +235,244 @@ public final class PersonModel_GsonTypeAdapter extends TypeAdapter<PersonModel> 
 }
 ```
 
+## Client side validation
+
+By adding `@Nullable` and `@NonNull` annotations to your POJOs you are able to optionally turn on a degree of client side validation in the form of required fields.
+
+The `@AutoGsonAdapter` has a property called `fieldValidationType` which specifies if and how the generated Type Adapter will validate the JSON. There are three different possible validation types:
+
+1. `NO_VALIDATION` - No fields are validated, and the Gson parser should never raise exceptions for missing content.
+2. `VALIDATE_EXPLICIT_NON_NULL` - Any Objects marked with `@NonNull` (or similar annotation), or primitives (since primitives cannot be null) should fail if the value does not exist within the JSON.
+3. `VALIDATE_ALL_EXCEPT_NULLABLE` - All fields will be treated as `@NonNull` (even when they are not annotated as such), and should fail when value is not found. The only exceptions to this rule is when a field is annotation with `@Nullable` (except for primitives).
+
+### Validate explicit non null - POJO
+
+```java
+@AutoGsonAdapter(fieldValidationType = GsonFieldValidationType.VALIDATE_EXPLICIT_NON_NULL)
+public class TestValidateExplicitNonNull {
+    @NonNull
+    public Integer mandatory1;
+    public int mandatory2;
+
+    public Integer optional1;
+}
+```
+
+### Validate explicit non null - Generated Type Adapter
+
+```java
+public final class TestValidateExplicitNonNull_GsonTypeAdapter extends TypeAdapter<TestValidateExplicitNonNull> {
+    private static final int MANDATORY_INDEX_MANDATORY1 = 0;
+    private static final int MANDATORY_INDEX_MANDATORY2 = 1;
+    private static final int MANDATORY_FIELDS_SIZE = 2;
+
+    private final Gson mGson;
+
+    public TestValidateExplicitNonNull_GsonTypeAdapter(Gson gson) {
+        this.mGson = gson;
+    }
+
+    @Override
+    public TestValidateExplicitNonNull read(JsonReader in) throws IOException {
+        // Ensure the object is not null.
+        if (!isValidValue(in)) {
+            return null;
+        }
+        
+        TestValidateExplicitNonNull result = new TestValidateExplicitNonNull();
+        boolean[] mandatoryFieldsCheckList = new boolean[MANDATORY_FIELDS_SIZE];
+
+        int jsonFieldCounter0 = 0;
+        in.beginObject();
+
+        while (in.hasNext()) {
+            if (jsonFieldCounter0 == 4) {
+                in.skipValue();
+                continue;
+            }
+
+            switch (in.nextName()) {
+                case "mandatory1":
+                    jsonFieldCounter0++;
+
+                    Integer value_mandatory1 = getIntegerSafely(in);
+                    if (value_mandatory1 != null) {
+                        result.mandatory1 = value_mandatory1;
+                        mandatoryFieldsCheckList[MANDATORY_INDEX_MANDATORY1] = true;
+                    } else {
+                        throw new gsonpath.JsonFieldMissingException("Mandatory JSON element 'mandatory1' was null for class 'adapter.auto.field_policy.validate_explicit_non_null.TestValidateExplicitNonNull'");
+                    }
+                    break;
+
+                case "mandatory2":
+                    jsonFieldCounter0++;
+
+                    Integer value_mandatory2 = getIntegerSafely(in);
+                    if (value_mandatory2 != null) {
+                        result.mandatory2 = value_mandatory2;
+                        mandatoryFieldsCheckList[MANDATORY_INDEX_mandatory2] = true;
+                    } else {
+                        throw new gsonpath.JsonFieldMissingException("Mandatory JSON element 'mandatory2' was null for class 'adapter.auto.field_policy.validate_explicit_non_null.TestValidateExplicitNonNull'");
+                    }
+                    break;
+
+                case "optional1":
+                    jsonFieldCounter0++;
+
+                    Integer value_optional1 = getIntegerSafely(in);
+                    if (value_optional1 != null) {
+                        result.optional1 = value_optional1;
+                    }
+                    break;
+
+                default:
+                    in.skipValue();
+                    break;
+            }
+        }
+
+        in.endObject();
+
+        // Mandatory object validation
+        for (int mandatoryFieldIndex = 0; mandatoryFieldIndex < MANDATORY_FIELDS_SIZE; mandatoryFieldIndex++) {
+
+            // Check if a mandatory value is missing.
+            if (!mandatoryFieldsCheckList[mandatoryFieldIndex]) {
+
+                // Find the field name of the missing json value.
+                String fieldName = null;
+                switch (mandatoryFieldIndex) {
+                    case MANDATORY_INDEX_MANDATORY1:
+                        fieldName = "mandatory1";
+                        break;
+
+                    case MANDATORY_INDEX_MANDATORY2:
+                        fieldName = "mandatory2";
+                        break;
+                }
+                throw new gsonpath.JsonFieldMissingException("Mandatory JSON element '" + fieldName + "' was not found for class 'adapter.auto.field_policy.validate_explicit_non_null.TestValidateExplicitNonNull'");
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public void write(JsonWriter out, TestValidateExplicitNonNull value) throws IOException {
+        // Omitted for this example to reduce page length.
+    }
+}
+```
+
+### Validate all except nullable - POJO
+
+```java
+@AutoGsonAdapter(fieldValidationType = GsonFieldValidationType.VALIDATE_ALL_EXCEPT_NULLABLE)
+public class TestValidateAllExceptNullable {
+    public Integer mandatory1;
+    public Integer mandatory2;
+
+    @Nullable
+    public Integer optional1;
+}
+```
+
+### Validate all except nullable - Generated Type Adapter
+
+```java
+public final class TestValidateAllExceptNullable_GsonTypeAdapter extends TypeAdapter<TestValidateAllExceptNullable> {
+    private static final int MANDATORY_INDEX_MANDATORY1 = 0;
+    private static final int MANDATORY_FIELDS_SIZE = 1;
+
+    private final Gson mGson;
+
+    public TestValidateAllExceptNullable_GsonTypeAdapter(Gson gson) {
+        this.mGson = gson;
+    }
+
+    @Override
+    public TestValidateAllExceptNullable read(JsonReader in) throws IOException {
+        // Ensure the object is not null.
+        if (!isValidValue(in)) {
+            return null;
+        }
+		
+        TestValidateAllExceptNullable result = new TestValidateAllExceptNullable();
+        boolean[] mandatoryFieldsCheckList = new boolean[MANDATORY_FIELDS_SIZE];
+
+        int jsonFieldCounter0 = 0;
+        in.beginObject();
+
+        while (in.hasNext()) {
+            if (jsonFieldCounter0 == 3) {
+                in.skipValue();
+                continue;
+            }
+
+            switch (in.nextName()) {
+                case "mandatory1":
+                    jsonFieldCounter0++;
+
+                    Integer value_mandatory1 = getIntegerSafely(in);
+                    if (value_mandatory1 != null) {
+                        result.mandatory1 = value_mandatory1;
+                        mandatoryFieldsCheckList[MANDATORY_INDEX_MANDATORY1] = true;
+                    } else {
+                        throw new gsonpath.JsonFieldMissingException("Mandatory JSON element 'mandatory1' was null for class 'adapter.auto.field_policy.validate_all_except_nullable.TestValidateAllExceptNullable'");
+                    }
+                    break;
+
+                case "optional1":
+                    jsonFieldCounter0++;
+
+                    Integer value_optional1 = getIntegerSafely(in);
+                    if (value_optional1 != null) {
+                        result.optional1 = value_optional1;
+                    }
+                    break;
+
+                default:
+                    in.skipValue();
+                    break;
+            }
+        }
+
+        in.endObject();
+
+        // Mandatory object validation
+        for (int mandatoryFieldIndex = 0; mandatoryFieldIndex < MANDATORY_FIELDS_SIZE; mandatoryFieldIndex++) {
+
+            // Check if a mandatory value is missing.
+            if (!mandatoryFieldsCheckList[mandatoryFieldIndex]) {
+
+                // Find the field name of the missing json value.
+                String fieldName = null;
+                switch (mandatoryFieldIndex) {
+                    case MANDATORY_INDEX_MANDATORY1:
+                        fieldName = "mandatory1";
+                        break;
+                }
+                throw new gsonpath.JsonFieldMissingException("Mandatory JSON element '" + fieldName + "' was not found for class 'adapter.auto.field_policy.validate_all_except_nullable.TestValidateAllExceptNullable'");
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public void write(JsonWriter out, TestValidateAllExceptNullable value) throws IOException {
+        // Omitted for this example to reduce page length.
+    }
+}
+```
+
+## Generate POJOs using interfaces
+
+## Json Path Substitutions
+
 # Download
+
+### Gradle dependencies
 
 ```gradle
 compile 'net.lachlanmckee:gsonpath:1.6.0'

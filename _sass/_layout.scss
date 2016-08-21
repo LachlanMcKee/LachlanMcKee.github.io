@@ -225,12 +225,15 @@
 
     h2 {
         font-size: 22px;
+		margin-top: 30px;
 		border-top: 1px solid #aaa;
 		border-bottom: 1px solid #aaa;
     }
 
     h3 {
         font-size: 18px;
+		line-height: 0px;
+		padding-top: 15px;
 		font-style: italic;
     }
 }
