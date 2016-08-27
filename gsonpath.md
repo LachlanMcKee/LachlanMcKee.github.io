@@ -11,17 +11,17 @@ Last updated: August 21st 2016
 * [Javadoc](javadoc)
 
 # Introduction
-Reading and writing JSON is a common practice when working with REST APIs. One of the most popular Java libraries for reading and writing JSON is [Gson](https://github.com/google/gson), a library written and maintained by Google.
+Reading and writing JSON is a common place when working with REST APIs. One of the most popular Java libraries used for this purpose is [Gson](https://github.com/google/gson), which is a library written and maintained by Google.
 
-Gson Path at its core is a Java annotation processor which generates Gson Type Adapters at compile time to avoid costly reflection at runtime. It also hosts a multitude of other features which will be described within this document.
+Gson Path is a Java annotation processor which generates Gson Type Adapters at compile time to avoid costly reflection at runtime. It also hosts a multitude of other features which will be described within this document.
 
 # Usage
 
-Getting started using Gson Path is extremely simple. If you have not already done so, go to the [download](#download) section and add the dependency to your build.
+Getting started using Gson Path is straight forward. If you have not already done so, visit the [download](#download) section and add the dependencies to your build.
 
-Since Gson Path is an annotation processor, the majority of the work is done for you during compilation. Every class annotated with the `@AutoGsonAdapter` annotation will prompt the library to generate a Type Adapter. There are many examples of the annotation usage described in the [features](#features) section.
+As Gson Path is an annotation processor, the majority of the heavy lifting is done during compilation. Every class annotated with the `@AutoGsonAdapter` annotation will generate a Type Adapter. The annotation exposes a rich set of configurations, and there are many examples their usage discussed in the [features](#features) section.
 
-To make use of these generated classes, you must add the Gson Path Type Adapter Factory:
+To add these generated classes into your project, the Gson Path Type Adapter Factory must be added to the Gson instance, as shown below:
 
 ```java
 GsonBuilder gsonBuilder = new GsonBuilder();
@@ -29,11 +29,11 @@ gsonBuilder.registerTypeAdapterFactory(GsonPath.createTypeAdapterFactory());
 Gson gson = gsonBuilder.create();
 ```
 
-This Type Adapter factory adds all of the generated Type Adapters into Gson without a developer needing to reference the classes directly.
+This factory maps all of the generated Type Adapters to their respective POJO within Gson without a developer needing to reference the classes directly.
 
 # Features
 
-Aside from generating typical Gson Type Adapters at compile time, there are many other features available within the library which create extremely powerful Type Adapters which allow you to further reduce boilerplate code.
+Aside from generating typical Gson Type Adapters at compile time, there are many other features available within the library which expand the Type Adapters functionality to further reduce boilerplate code.
 
 1. [Basic Json Path support](#basic-json-path-support)
 2. [Client side validation](#client-side-validation)
@@ -42,11 +42,11 @@ Aside from generating typical Gson Type Adapters at compile time, there are many
 
 ## Basic Json Path support
 
-Gson supports marshalling and unmarshalling JSON content into Java POJOs. Unfortunately the library requires a one-to-one relationship between a POJO and a JSON object. This means that the more complex a JSON document is, the more POJOs a developer must create.
+Gson Type Adapters handle marshalling and unmarshalling JSON content into Java POJOs out of the box. Unfortunately the library requires a one-to-one relationship between a POJO and a JSON object. This means that the more complex a JSON document is, the more POJOs a developer must create.
 
 Gson Path adds basic [Json Path](http://goessner.net/articles/JsonPath/) support to solve this problem. Json Path is a query language similar to [XPath](https://en.wikipedia.org/wiki/XPath), which allows you to reference elements within a document through shorthand notation (e.g. `parent.child`).
 
-This shorthand notation is extremely useful to avoid creating numerous Java POJOs to access a particular subsection of a JSON document. Gson Path takes advantage of this Json Path 'dot notation' concept to give developers the ability to reference specific fields within a JSON tree from the standard Gson `SerializedName` annotation (this works for Type Adapter reading and writing).
+This shorthand notation is extremely useful as it provides access to a particular subsection of a JSON document. Gson Path takes advantage of this Json Path 'dot notation' query to allow developers to reference specific fields within a JSON tree from the standard Gson `SerializedName` annotation (this works for Type Adapter reading and writing).
 
 For example, given the following JSON:
 
@@ -61,7 +61,7 @@ For example, given the following JSON:
 }
 ```
 
-We can deserialize the JSON with a single Java class multiple ways. The following classes demonstrate the annotations required to create a type adapter which can correctly read the nested content.
+We can deserialize this JSON using a single Java class several ways. The following classes demonstrate the annotations required to create a Type Adapter which can read the nested content.
 
 ### POJO Example 1
 
@@ -78,7 +78,7 @@ public class PersonModel {
 ```
 
 ### POJO Example 2
-The `rootField` property of the `@AutoGsonAdapter` annotation is useful to avoid repetition.
+The `rootField` property of the `@AutoGsonAdapter` annotation is used to avoid repetition.
 
 ```java
 @AutoGsonAdapter(rootField = "person.names")
@@ -92,7 +92,7 @@ public class PersonModel {
 ```
 
 ### POJO Example 3
-If the name of the field matches the name of the JSON key, the `@SerializedName` annotation can be omitted.
+When the name of the field matches the name of the JSON key, the `@SerializedName` annotation can be omitted.
 
 ```java
 @AutoGsonAdapter(rootField = "person.names")
@@ -254,13 +254,13 @@ public final class PersonModel_GsonTypeAdapter extends TypeAdapter<PersonModel> 
 
 ## Client side validation
 
-By adding `@Nullable` and `@NonNull` annotations to your POJOs you are able to optionally turn on a degree of client side validation in the form of required fields.
+Developers are able to optionally turn on a degree of client side validation (in the form of required fields) by adding `@Nullable` and `@NonNull` annotations to their POJOs.
 
-The `@AutoGsonAdapter` has a property called `fieldValidationType` which specifies if and how the generated Type Adapter will validate the JSON. There are three different possible validation types:
+The `@AutoGsonAdapter` annotation has a property called `fieldValidationType` which specifies if and how the generated Type Adapter will validate the JSON. There are three different possible validation types:
 
 1. `NO_VALIDATION` - No fields are validated, and the Gson parser should never raise exceptions for missing content.
-2. `VALIDATE_EXPLICIT_NON_NULL` - Any Objects marked with `@NonNull` (or similar annotation), or primitives (since primitives cannot be null) should fail if the value does not exist within the JSON.
-3. `VALIDATE_ALL_EXCEPT_NULLABLE` - All fields will be treated as `@NonNull` (even when they are not annotated as such), and should fail when value is not found. The only exceptions to this rule is when a field is annotation with `@Nullable` (except for primitives).
+2. `VALIDATE_EXPLICIT_NON_NULL` - Any Objects marked with `@NonNull` (or similar annotation), or primitives (since primitives cannot be null) will raise an exception if the value does not exist within the JSON.
+3. `VALIDATE_ALL_EXCEPT_NULLABLE` - All fields will be treated as `@NonNull` (even when they are not annotated as such), and will raise an exception when if the value is not found. The only exceptions to this rule is when a field is annotation with `@Nullable` (except for primitives, since they cannot be null).
 
 ### Validate explicit non null - POJO
 
@@ -485,13 +485,13 @@ public final class TestValidateAllExceptNullable_GsonTypeAdapter extends TypeAda
 
 ## Generate POJOs using interfaces
 
-Gson Path supports using the `@AutoGsonAdapter` annotation with interfaces.
+Gson Path supports annotating interfaces with the `@AutoGsonAdapter` annotation.
 
-The library generates an immutable POJO which is used as the concrete implementation of the interface when the Type Adapter deserializes the JSON.
+At compile time an immutable POJO is generated, and is used as the concrete implementation of the interface when the Type Adapter deserializes the JSON.
 
 ### Differences to standard POJO
 
-There are a few key differences between standard classes using the `AutoGsonAdapter` annotation, and an interface that you should be aware of. These are:
+There are a few key differences between standard classes using the `AutoGsonAdapter` annotation, and an interface. These are as follows:
 
 * The `GsonFieldValidationType` property (mentioned in the [Client side validation](#client-side-validation) section) can only ever be `VALIDATE_EXPLICIT_NON_NULL` or `VALIDATE_ALL_EXCEPT_NULLABLE`. 
    * This API design decision was made since you are unable to set a default value for primitive return types. 
