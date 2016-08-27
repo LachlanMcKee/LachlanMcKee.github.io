@@ -250,6 +250,8 @@ public final class PersonModel_GsonTypeAdapter extends TypeAdapter<PersonModel> 
 }
 ```
 
+[Back to top](#introduction)
+
 ## Client side validation
 
 Developers are able to optionally turn on a degree of client side validation (in the form of required fields) by adding `@Nullable` and `@NonNull` annotations to their POJOs.
@@ -481,6 +483,8 @@ public final class TestValidateAllExceptNullable_GsonTypeAdapter extends TypeAda
 }
 ```
 
+[Back to top](#introduction)
+
 ## Generate POJOs using interfaces
 
 Gson Path supports annotating interfaces with the `@AutoGsonAdapter` annotation.
@@ -649,7 +653,69 @@ public final class InterfaceExample_GsonTypeAdapter extends TypeAdapter<Interfac
 }
 ```
 
+[Back to top](#introduction)
+
 ## Json Path Substitutions
+
+Json Path Substitutions build on top of the expressive Json Path 'dot notation' by adding placeholder substitution within the `@SerializedName` annotation field name.
+
+This is useful in situations where an API returns nearly identical JSON, however the keys may differ. The aim of this feature is to reuse as much code as possible, and avoid creating two completely different models, or using inheritance in conjunction with abstract methods.
+
+For example, given the following two similar json responses:
+
+```json
+{
+  "staff": {
+    "name": "John Smith",
+    "age": 50
+  },
+  "address": "123 Fake St"
+}
+```
+```json
+{
+  "customer": {
+    "name": "Jack Torrance",
+    "age": 29
+  },
+  "address": "Overlook Hotel"
+}
+```
+
+The following base model can be created to contain all of the fields:
+
+```java
+public class ContactDetailsBase {
+    @SerializedName("{PERSON_DETAILS_SUB}.")
+    public String name;
+    
+    @SerializedName("{PERSON_DETAILS_SUB}.")
+    public int age;
+    
+    public String address;
+}
+```
+
+And the two implementing classes would be as follows:
+
+```java
+@AutoGsonAdapter(substitutions = {
+        @PathSubstitution(original = "PERSON_DETAILS_SUB", replacement = "staff")
+})
+public class StaffContactDetails extends ContactDetailsBase {
+}
+```
+```java
+@AutoGsonAdapter(substitutions = {
+        @PathSubstitution(original = "PERSON_DETAILS_SUB", replacement = "customer")
+})
+public class CustomerContactDetails extends ContactDetailsBase {
+}
+```
+
+When the Type Adapter is generated it will inspect every field annotated with `@SerializedName` and execute a string replacement which searches for the 'original' value wrapped with `{}` and replaces it with the 'replacement' value.
+
+[Back to top](#introduction)
 
 # Download
 
@@ -684,3 +750,5 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+[Back to top](#introduction)
