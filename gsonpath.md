@@ -1,17 +1,15 @@
 ---
-layout: page
+layout: post
 title: Gson Path
+date: August 27th 2016
+author: Lachlan McKee
 permalink: /gsonpath/
 ---
 
-Last updated: August 21st 2016
-
-* [Download](#download)
-* [License](#license)
-* [Javadoc](javadoc)
+[Github](https://github.com/LachlanMcKee/gsonpath) \| [Download](#download) \| [License](#license) \| [Javadoc](javadoc)
 
 # Introduction
-Reading and writing JSON is a common place when working with REST APIs. One of the most popular Java libraries used for this purpose is [Gson](https://github.com/google/gson), which is a library written and maintained by Google.
+Reading and writing JSON is common place when working with REST APIs. One of the most popular Java libraries used for this purpose is [Gson](https://github.com/google/gson), which is a library written and maintained by Google.
 
 Gson Path is a Java annotation processor which generates Gson Type Adapters at compile time to avoid costly reflection at runtime. It also hosts a multitude of other features which will be described within this document.
 
